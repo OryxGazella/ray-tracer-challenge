@@ -1,0 +1,25 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.4.21'
+    id 'application'
+}
+
+group = 'soy.frank'
+version = '0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+
+
+compileKotlin {
+    kotlinOptions.jvmTarget = '11'
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = '11'
+}
+
+application {
+    mainClass.set('soy.frank.rayTracer.MainKt')
+}
