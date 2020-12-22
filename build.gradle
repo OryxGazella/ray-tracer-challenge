@@ -10,8 +10,28 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    testImplementation 'io.cucumber:cucumber-java:6.8.1'
+    testImplementation 'io.cucumber:cucumber-junit:6.8.1'
+    testImplementation 'junit:junit:4.13'
+}
 
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
 
+task cucumber {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = 'io.cucumber.core.cli.Main'
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'pretty', '--glue', 'soy.frank.rayTracer', 'src/test/resources']
+        }
+    }
+}
 compileKotlin {
     kotlinOptions.jvmTarget = '11'
 }
