@@ -2,6 +2,7 @@ package soy.frank.rayTracer
 
 import io.cucumber.groovy.EN
 import io.cucumber.groovy.Hooks
+import soy.frank.rayTracer.maths.Color
 import soy.frank.rayTracer.maths.ExtensionsKt
 import soy.frank.rayTracer.maths.Tuple
 
@@ -9,10 +10,12 @@ this.metaClass.mixin(EN)
 this.metaClass.mixin(Hooks)
 
 List<Tuple> xs
+List<Color> cs
 def delta = 0.000001f
 
 Before() {
     xs = []
+    cs = []
 }
 
 Given("(v|z)(1/2) := vector\\({float}, {float}, {float})") { float x, float y, float z ->
@@ -86,4 +89,48 @@ Then("v1 dot v2 = {float}") { float expectedDotProduct ->
 
 Then("v1 cross v2 = {string}") { String expectedTuple ->
     assert expectedTuple == xs[0].cross(xs[1]).toString()
+}
+
+Given("c(1|2) := Color\\({float}, {float}, {float})") { float red, float green, float blue ->
+    cs.add(new Color(red, green, blue))
+}
+
+Then("c.{word} = {float}") { String color, float value ->
+    assert cs[0].invokeMethod("get${color.capitalize()}", null) == value
+}
+
+static def compareColor(float red, float green, float blue, Color toCompare) {
+    def colorValue = [
+            'red'  : red,
+            'green': green,
+            'blue' : blue
+    ]
+    ["red", "green", "blue"].each { color ->
+        assert Math.abs(toCompare.invokeMethod("get${color.capitalize()}", null) as float - colorValue[color]) < 0.000001f
+    }
+}
+
+Then("c1 + c2 = Color\\({float}, {float}, {float})") { float red, float green, float blue ->
+    def addition = cs[0] + cs[1]
+    compareColor(red, green, blue, addition)
+}
+
+Then("c1 - c2 = Color\\({float}, {float}, {float})") { float red, float green, float blue ->
+    def difference = cs[0] - cs[1]
+    compareColor(red, green, blue, difference)
+}
+
+Then("c * {float} = Color\\({float}, {float}, {float})") { float scalar, float red, float green, float blue ->
+    def result = cs[0].times(scalar)
+    assert new Color(red, green, blue) == result
+}
+
+Then("{float} * c = Color\\({float}, {float}, {float})") { float scalar, float red, float green, float blue ->
+    def result =  ExtensionsKt.times(scalar, cs[0])
+    assert new Color(red, green, blue) == result
+}
+
+Then("c1 * c2 = Color\\({float}, {float}, {float})") { float red, float green, float blue ->
+    def product = cs[0].times(cs[1])
+    compareColor(red, green, blue, product)
 }
