@@ -1,6 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.4.21'
     id 'application'
+    id 'groovy'
 }
 
 group = 'soy.frank'
@@ -11,9 +12,10 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'io.cucumber:cucumber-java:6.8.1'
+    testImplementation 'io.cucumber:cucumber-groovy:6.1.1'
     testImplementation 'io.cucumber:cucumber-junit:6.8.1'
-    testImplementation 'junit:junit:4.13'
+    testImplementation 'org.codehaus.groovy:groovy-all:3.0.7'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.4.2'
 }
 
 configurations {
@@ -42,4 +44,10 @@ compileTestKotlin {
 
 application {
     mainClass.set('soy.frank.rayTracer.MainKt')
+}
+
+test {
+    systemProperty("cucumber.execution.parallel.enabled", System.getProperty("test.parallel"))
+    systemProperty("cucumber.filter.tags", "not @ignore")
+    useJUnitPlatform()
 }
