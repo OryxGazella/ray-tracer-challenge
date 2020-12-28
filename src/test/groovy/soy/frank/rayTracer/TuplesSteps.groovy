@@ -95,7 +95,7 @@ Given("c(1|2) := Color\\({float}, {float}, {float})") { float red, float green, 
     cs.add(new Color(red, green, blue))
 }
 
-Then("c.{word} = {float}") { String color, float value ->
+Then("color.{word} = {float}") { String color, float value ->
     assert cs[0].invokeMethod("get${color.capitalize()}", null) == value
 }
 
