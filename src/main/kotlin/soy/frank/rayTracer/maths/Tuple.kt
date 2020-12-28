@@ -4,7 +4,7 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 data class Tuple(val x: Float, val y: Float, val z: Float, val w: Float) {
-    val type: Type = if (w == 0.0f) Type.Vector else Type.Point
+    val type = if (w == 0.0f) Type.Vector else Type.Point
 
     enum class Type {
         Point,
@@ -19,7 +19,7 @@ data class Tuple(val x: Float, val y: Float, val z: Float, val w: Float) {
     operator fun plus(other: Tuple) = Tuple(x + other.x, y + other.y, z + other.z, w + other.w)
     operator fun minus(other: Tuple) = Tuple(x - other.x, y - other.y, z - other.z, w - other.w)
     operator fun unaryMinus() = Tuple(-x, -y, -z, -w)
-    operator fun times(scalar: Float): Tuple = Tuple(x * scalar, y * scalar, z * scalar, w * scalar)
+    operator fun times(scalar: Float) = Tuple(x * scalar, y * scalar, z * scalar, w * scalar)
     operator fun div(scalar: Float) = times(1 / scalar)
     fun magnitude() = sqrt(x.pow(2) + y.pow(2) + z.pow(2) + w.pow(2))
     fun normalize() = div(magnitude())
