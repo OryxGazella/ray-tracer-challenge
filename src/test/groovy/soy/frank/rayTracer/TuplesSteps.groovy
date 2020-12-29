@@ -120,13 +120,13 @@ Then("c1 - c2 = Color\\({float}, {float}, {float})") { float red, float green, f
     compareColor(red, green, blue, difference)
 }
 
-Then("c * {float} = Color\\({float}, {float}, {float})") { float scalar, float red, float green, float blue ->
+Then("c1 * {float} = Color\\({float}, {float}, {float})") { float scalar, float red, float green, float blue ->
     def result = cs[0].times(scalar)
     assert new Color(red, green, blue) == result
 }
 
-Then("{float} * c = Color\\({float}, {float}, {float})") { float scalar, float red, float green, float blue ->
-    def result =  ExtensionsKt.times(scalar, cs[0])
+Then("{float} * c1 = Color\\({float}, {float}, {float})") { float scalar, float red, float green, float blue ->
+    def result = ExtensionsKt.times(scalar, cs[0])
     assert new Color(red, green, blue) == result
 }
 

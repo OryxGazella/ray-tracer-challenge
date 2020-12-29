@@ -1,5 +1,7 @@
 package soy.frank.rayTracer.maths
 
+import kotlin.math.roundToInt
+
 class Color {
     private val tuple : Tuple
     constructor(red: Float, green : Float, blue: Float) {
@@ -33,6 +35,9 @@ class Color {
         return "Color(red=$red, green=$green, blue=$blue)"
     }
 
+    fun asPixMap(): String =
+            "${(clamp(red) * 255).roundToInt()} ${(clamp(green) * 255).roundToInt()} ${(clamp(blue) * 255).roundToInt()}"
+
 
     constructor(fromTuple: Tuple) {
         tuple = fromTuple
@@ -44,4 +49,14 @@ class Color {
         get() = tuple.y
     val blue: Float
         get() = tuple.z
+
+    companion object {
+        val black = Color(0f, 0f, 0f)
+
+        private fun clamp(toClamp: Float): Float {
+            if (toClamp > 1f) return 1f
+            if (toClamp < 0f) return 0f
+            return toClamp
+        }
+    }
 }

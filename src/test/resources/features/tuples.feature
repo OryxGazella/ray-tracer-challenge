@@ -109,7 +109,7 @@ Feature: Tuples, Vectors, and Points
       | vector(0, 0, 1) | vector(0, 1, 0) | Tuple(x=-1.0, y=0.0, z=0.0, w=0.0) |
 
   Scenario: Colors are (red, green, blue) tuples
-    Given c := Color(-0.5, 0.4, 1.7)
+    Given c1 := Color(-0.5, 0.4, 1.7)
     Then color.red = -0.5
     And color.green = 0.4
     And color.blue = 1.7
@@ -125,9 +125,9 @@ Feature: Tuples, Vectors, and Points
     Then c1 - c2 = Color(0.2, 0.5, 0.5)
 
   Scenario: Multiplying a color by a scalar
-    Given c := Color(0.2, 0.3, 0.4)
-    Then c * 2 = Color(0.4, 0.6, 0.8)
-    And 2 * c = Color(0.4, 0.6, 0.8)
+    Given c1 := Color(0.2, 0.3, 0.4)
+    Then c1 * 2 = Color(0.4, 0.6, 0.8)
+    And 2 * c1 = Color(0.4, 0.6, 0.8)
 
   Scenario: Multiplying colors
     Given c1 := Color(1.0, 0.2, 0.4)
