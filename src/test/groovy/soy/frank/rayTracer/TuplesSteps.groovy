@@ -1,5 +1,6 @@
 package soy.frank.rayTracer
 
+import groovy.transform.Field
 import io.cucumber.groovy.EN
 import io.cucumber.groovy.Hooks
 import soy.frank.rayTracer.maths.Color
@@ -9,46 +10,44 @@ import soy.frank.rayTracer.maths.Tuple
 this.metaClass.mixin(EN)
 this.metaClass.mixin(Hooks)
 
-List<Tuple> xs
-List<Color> cs
+@Field
+def testVariables = TestVariables.map
+
 def delta = 0.000001f
 
 Before() {
-    xs = []
-    cs = []
 }
 
-Given("(v|z)(1/2) := vector\\({float}, {float}, {float})") { float x, float y, float z ->
-    xs.add(Tuple.@Companion.vector(x, y, z))
+Given("{word} := vector\\({float}, {float}, {float})") { String variableName, float x, float y, float z ->
+    testVariables[variableName] = Tuple.@Companion.vector(x, y, z)
 }
 
-Given("a(1/2) := Tuple\\({float}, {float}, {float}, {float})") { float x, float y, float z, float w ->
-    xs.add new Tuple(x, y, z, w)
+Given(/^([a-z]\d*) := Tuple\((.*), (.*), (.*), (.*)\)$/) { String variableName, float x, float y, float z, float w ->
+    testVariables[variableName] = new Tuple(x, y, z, w)
 }
 
-Given("p(1/2) := point\\({float}, {float}, {float})") { float x, float y, float z ->
-    xs.add(Tuple.@Companion.point(x, y, z))
+Given("{word} := point\\({float}, {float}, {float})") { String variableName, float x, float y, float z ->
+    testVariables[variableName] = Tuple.@Companion.point(x, y, z)
 }
 
-Then("a is a {string}") { String expectedType ->
-    assert expectedType.toLowerCase() == xs[0].type.toString().toLowerCase()
+Then("{word} is a {string}") { String variableName, String expectedType ->
+    assert expectedType.toLowerCase() == testVariables[variableName].type.toString().toLowerCase()
 }
 
-Then("a is not a {string}") { String nonExpectedType ->
-    assert nonExpectedType.toLowerCase() != xs[0].type.toString()
+Then("{word} is not a {string}") { String variableName, String nonExpectedType ->
+    assert nonExpectedType.toLowerCase() != testVariables[variableName].type.toString()
 }
 
-Then("(p|v|a|b) = {string}") { String expectedToString ->
-    assert expectedToString == xs[0].toString()
+Then(/^([a-z]+\d*) = (.*)$/) { String variableName, String expectedToString ->
+    assert expectedToString == testVariables[variableName].toString()
 }
 
-Then("a1 + a2 = {string}") { String expectedTuple ->
-    def sum = xs[0] + xs[1]
-    assert expectedTuple == sum.toString()
+Then(/^(\w+\d*) \+ (\w+\d*) = (Tuple.*)$/) { String lhs, String rhs, String expectedToString ->
+    assert (testVariables[lhs] + testVariables[rhs]).toString() == expectedToString
 }
 
-Then("(p/v)(zero)(1) - (p/v)(2) = {string}") { String expectedTuple ->
-    def difference = xs[0] - xs[1]
+Then("{word} - {word} = {string}") { String lhs, String rhs, String expectedTuple ->
+    def difference = testVariables[lhs] - testVariables[rhs]
     assert expectedTuple == difference.toString()
 }
 
@@ -57,46 +56,50 @@ Then("(p/v)(zero)(1) - (p/v)(2) = {string}") { String expectedTuple ->
   negative  | unaryMinus
   multiply  | times
   */
-When("b := a * {float}") { Float scalar ->
-    xs[0] = ExtensionsKt.times(scalar, xs[0])
+When("{word} := {word} * {float}") { String result, String base, Float scalar ->
+    testVariables[result] = ExtensionsKt.times(scalar, testVariables[base] as Tuple)
 }
 
 //See above
-When("b := {float} * a") { float scalar ->
-    xs[0] = xs[0].times(scalar)
+When("{word} := {float} * {word}") { String result, float scalar, String base ->
+    testVariables[result] = testVariables[base].times(scalar)
 }
 
 //See above
 Then("-a = {string}") { String expectedTuple ->
-    assert expectedTuple == (xs[0].unaryMinus()).toString()
+    assert expectedTuple ==
+            (testVariables.a.unaryMinus()).toString()
 }
 
-When("b := a / {float}") { float scalar ->
-    xs[0] = xs[0] / scalar
+When("{word} := {word} / {float}") { String result, String base, float scalar ->
+    testVariables[result] = testVariables[base] / scalar
 }
 
-Then("magnitude\\(v) = {float}") { float expectedMagnitude ->
-    assert Math.abs(expectedMagnitude - xs[0].magnitude()) < delta
+Then("magnitude\\({word}) = {float}") { String tupleName, float expectedMagnitude ->
+    assert Math.abs(
+            expectedMagnitude - testVariables[tupleName].magnitude() as float) <
+            delta
 }
 
-Given("b := v.normalize") { ->
-    xs[0] = xs[0].normalize()
+Given("{word} := {word}.normalize") { String result, String base ->
+    testVariables[result] = testVariables[base].normalize()
 }
 
-Then("v1 dot v2 = {float}") { float expectedDotProduct ->
-    assert expectedDotProduct == xs[0].dot(xs[1])
+Then("{word} dot {word} = {float}") { String lhs, String rhs, float expectedDotProduct ->
+    assert expectedDotProduct == testVariables[lhs].dot(testVariables[rhs])
 }
 
-Then("v1 cross v2 = {string}") { String expectedTuple ->
-    assert expectedTuple == xs[0].cross(xs[1]).toString()
+Then("{word} cross {word} = {string}") { String lhs, String rhs, String expectedTuple ->
+    assert expectedTuple == testVariables[lhs].cross(
+            testVariables[rhs]).toString()
 }
 
-Given("c(1|2) := Color\\({float}, {float}, {float})") { float red, float green, float blue ->
-    cs.add(new Color(red, green, blue))
+Given(/^([a-zA-Z]+\d*) := Color\((-?\d+\.?\d*), (-?\d+\.?\d*), (-?\d+\.?\d*)\)$/) { String colorName, float redValue, float greenValue, float blueValue ->
+    testVariables[colorName] = new Color(redValue, greenValue, blueValue)
 }
 
 Then("color.{word} = {float}") { String color, float value ->
-    assert cs[0].invokeMethod("get${color.capitalize()}", null) == value
+    assert testVariables.color.invokeMethod("get${color.capitalize()}", null) == value
 }
 
 static def compareColor(float red, float green, float blue, Color toCompare) {
@@ -110,27 +113,27 @@ static def compareColor(float red, float green, float blue, Color toCompare) {
     }
 }
 
-Then("c1 + c2 = Color\\({float}, {float}, {float})") { float red, float green, float blue ->
-    def addition = cs[0] + cs[1]
+Then("{word} + {word} = Color\\({float}, {float}, {float})") {String lhs, String rhs, float red, float green, float blue ->
+    Color addition = testVariables[lhs] + testVariables[rhs]
     compareColor(red, green, blue, addition)
 }
 
-Then("c1 - c2 = Color\\({float}, {float}, {float})") { float red, float green, float blue ->
-    def difference = cs[0] - cs[1]
+Then("{word} - {word} = Color\\({float}, {float}, {float})") { String lhs, String rhs, float red, float green, float blue ->
+    Color difference = testVariables[lhs] - testVariables[rhs]
     compareColor(red, green, blue, difference)
 }
 
-Then("c1 * {float} = Color\\({float}, {float}, {float})") { float scalar, float red, float green, float blue ->
-    def result = cs[0].times(scalar)
+Then(/^([a-z]+\d*) \* (-?\d+\.?\d*) = Color\((.*), (.*), (.*)\)$/) { String variableName, float scalar, float red, float green, float blue ->
+    def result = testVariables[variableName].times(scalar)
     assert new Color(red, green, blue) == result
 }
 
-Then("{float} * c1 = Color\\({float}, {float}, {float})") { float scalar, float red, float green, float blue ->
-    def result = ExtensionsKt.times(scalar, cs[0])
-    assert new Color(red, green, blue) == result
-}
-
-Then("c1 * c2 = Color\\({float}, {float}, {float})") { float red, float green, float blue ->
-    def product = cs[0].times(cs[1])
+Then(/^([a-z]\d*) \* ([a-z]+\d*) = Color\((.*), (.*), (.*)\)$/) {String lhs, String rhs, float red, float green, float blue ->
+    Color product = testVariables[lhs].times(testVariables[rhs])
     compareColor(red, green, blue, product)
+}
+
+Then(/^(\d+\.?\d*) \* ([a-z]+\d*) = Color\((.*), (.*), (.*)\)$/) { float scalar, String variableName, float red, float green, float blue ->
+    def result = ExtensionsKt.times(scalar, testVariables[variableName] as Color)
+    assert new Color(red, green, blue) == result
 }

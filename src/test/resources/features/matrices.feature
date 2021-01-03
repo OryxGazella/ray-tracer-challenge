@@ -81,8 +81,8 @@ Feature: Matrices
       | 2 | 4 | 4 | 2 |
       | 8 | 6 | 4 | 1 |
       | 0 | 0 | 0 | 1 |
-    And b := tuple(1, 2, 3, 1)
-    Then A * b = tuple(18, 24, 33, 1)
+    And b := Tuple(1, 2, 3, 1)
+    Then A * b = Tuple(18, 24, 33, 1)
 
   Scenario: Multiplying a matrix by the identity matrix
     Given the following matrix A:
@@ -94,7 +94,7 @@ Feature: Matrices
     Then identity_matrix * A = A
 
   Scenario: Multiplying the identity matrix by a tuple
-    Given b := tuple(1, 2, 3, 4)
+    Given a := Tuple(1, 2, 3, 4)
     Then identity_matrix * a = a
 
   Scenario: Transposing a matrix

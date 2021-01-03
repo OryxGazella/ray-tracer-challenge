@@ -10,16 +10,13 @@ import soy.frank.rayTracer.maths.Tuple
 this.metaClass.mixin(EN)
 this.metaClass.mixin(Hooks)
 
-List<Matrix> matrices
-@Field
-Tuple tuple
+@Field private Object testVariables = TestVariables.map
 
 Before {
-    matrices = []
 }
 
-Given(/the following matrix (M|A|B):/) { DataTable table ->
-    matrices.add(tableToMatrix(table))
+Given(/^the following matrix ([A-Z]):$/) { String varName, DataTable table ->
+    testVariables[varName] = tableToMatrix(table)
 }
 
 private static tableToMatrix(DataTable table) {
@@ -32,18 +29,22 @@ private static tableToMatrix(DataTable table) {
             rows)
 }
 
-
 Then(/^([A-Z])\[(.*), (.*)\] = (.*)$/) { String prefix, int x, int y, String value ->
-    def matrixToTest = (prefix == 'B') ? matrices[1] : matrices[0]
+    def matrixToTest = testVariables[prefix] as Matrix
     assert matrixToTest[x, y] - (evaluate(value) as float) < 0.00001f
 }
 
 Then(/A = B/) { ->
-    assert matrices[0] == matrices[1]
+    def A = testVariables.A as Matrix
+    def B = testVariables.B as Matrix
+    assert A == B
+    assert A !== B
 }
 
 Then(/A != B/) { ->
-    assert matrices[0] != matrices[1]
+    def A = testVariables.A as Matrix
+    def B = testVariables.B as Matrix
+    assert A != B
 }
 
 Then(/A * B is the following matrix:/) { DataTable dataTable ->
@@ -53,70 +54,67 @@ Then(/A * B is the following matrix:/) { DataTable dataTable ->
         }
     }
     def expected = new Matrix(rows)
-
-    assert matrices[0] * matrices[1] == expected
+    assert testVariables.A * testVariables.B == expected
 }
 
-Given("b := tuple\\({float}, {float}, {float}, {float})") { float x, float y, float z, float w ->
-    tuple = new Tuple(x, y, z, w)
+Then(/^A \* ([a-z]) = Tuple\((.*), (.*), (.*), (.*)\)$/) {String tuple,  float x, float y, float z, float w ->
+    assert testVariables.A * testVariables[tuple] == new Tuple(x, y, z, w)
 }
 
-Then("A * b = tuple\\({float}, {float}, {float}, {float})") { float x, float y, float z, float w ->
-    assert matrices[0] * this.tuple == new Tuple(x, y, z, w)
+Then(/A * identity_matrix = A/) { ->
+    assert testVariables.A * Matrix.@Companion.identityMatrix44 == testVariables.A
 }
 
-Then(/A * identity_matrix = A/) {  ->
-    assert matrices[0] * Matrix.@Companion.identityMatrix44 == matrices[0]
+Then(/identity_matrix * A = A/) { ->
+    assert Matrix.@Companion.identityMatrix44 *
+            (testVariables.A as Matrix) ==
+            testVariables.A
 }
 
-Then(/identity_matrix * A = A/) {  ->
-    assert Matrix.@Companion.identityMatrix44 * matrices[0] == matrices[0]
-}
-
-Then(/identity_matrix * a = a/) {  ->
-    assert Matrix.@Companion.identityMatrix44 * this.tuple == this.tuple
+Then(/identity_matrix * a = a/) { ->
+    assert Matrix.@Companion.identityMatrix44 * (testVariables.a as Tuple) == testVariables.a
 }
 
 Then(/^A.transposed\(\) is the following matrix:$/) { DataTable table ->
-    assert matrices[0].transposed() == tableToMatrix(table)
+    assert testVariables.A.transposed() == tableToMatrix(table)
 }
 
 Then(/^([A-Z]).determinant\(\) = (.*)$/) { String prefix, float determinant ->
-    def matrixToTest = (prefix == 'A') ? matrices.first() : matrices.last()
+    def matrixToTest = testVariables[prefix]
     assert matrixToTest.determinant() == determinant
 }
 
 Then(/^A.submatrix\((.*), (.*)\) is the following matrix:$/) { Integer row, Integer column, DataTable table ->
-    assert matrices[0].submatrix(row, column) == tableToMatrix(table)
+    assert testVariables.A.submatrix(row, column) == tableToMatrix(table)
 }
 
 Given(/^B := A.submatrix\((.*), (.*)\)/) { Integer row, Integer column ->
-    matrices.add(matrices[0].submatrix(row, column))
+    testVariables.B = testVariables.A.submatrix(row, column)
 }
 
 Then(/^A.minor\((.*), (.*)\) = (.*)/) { Integer row, Integer column, Float minor ->
-    assert matrices[0].minor(row, column) == minor
+    assert testVariables.A.minor(row, column) == minor
 }
 
 Then(/^A.cofactor\((.*), (.*)\) = (.*)$/) { Integer row, Integer column, float cofactor ->
-    assert matrices[0].cofactor(row, column) == cofactor
+    assert testVariables.A.cofactor(row, column) == cofactor
 }
 
-Then(/A is invertible/) {  ->
-    assert matrices[0].invertible
+Then(/A is invertible/) { ->
+    assert testVariables.A.invertible
 }
 
-Then(/A is not invertible/) {  ->
-    assert !matrices[0].invertible
+Then(/A is not invertible/) { ->
+    assert !testVariables.A.invertible
 }
 
-Given(/^B := A.inverse\(\)$/) {  ->
-    matrices.add(matrices[0].inverse())
+Given(/^B := A.inverse\(\)$/) { ->
+    testVariables.B = testVariables.A.inverse()
 }
 
 Then(/^B is the following matrix:$/) { DataTable table ->
     def expectedMatrix = tableToMatrix(table)
-    def matrixToTest = matrices.last()
+    def matrixToTest = testVariables.B as Matrix
     compareMatrices(matrixToTest, expectedMatrix)
 }
 
@@ -133,8 +131,8 @@ private static compareMatrices(matrixToTest, expectedMatrix) {
 }
 
 Then(/^\(A \* B\) \* B.inverse\(\) = A$/) { ->
-    def A = matrices[0]
-    def B = matrices[1]
+    def A = testVariables.A
+    def B = testVariables.B
     def actual = (A * B) * B.inverse()
     compareMatrices(actual, A)
 }
