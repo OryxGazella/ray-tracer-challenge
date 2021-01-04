@@ -99,8 +99,8 @@ Then(/A is not invertible/) { ->
     assert !asMatrix('A').invertible
 }
 
-Given(/^B := A.inverse\(\)$/) { ->
-    testVariables.B = asMatrix('A').inverse()
+Given(/^(\w*) := (\w*).inverse\(\)$/) { String resultVariable, String sourceVariable ->
+    testVariables[resultVariable] = asMatrix(sourceVariable).inverse()
 }
 
 Then(/^B is the following matrix:$/) { DataTable table ->

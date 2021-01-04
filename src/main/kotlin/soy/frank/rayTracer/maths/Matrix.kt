@@ -1,5 +1,8 @@
 package soy.frank.rayTracer.maths
 
+import kotlin.math.cos
+import kotlin.math.sin
+
 class Matrix {
     private val matrix: FloatArray
     val numberOfRows: Int
@@ -19,6 +22,60 @@ class Matrix {
     }
 
     companion object {
+        fun translation(x: Float, y: Float, z: Float) = Matrix(
+            listOf(
+                listOf(1f, 0f, 0f, x),
+                listOf(0f, 1f, 0f, y),
+                listOf(0f, 0f, 1f, z),
+                listOf(0f, 0f, 0f, 1f),
+            )
+        )
+
+        fun scaling(x: Float, y: Float, z: Float) = Matrix(
+            listOf(
+                listOf(x, 0f, 0f, 0f),
+                listOf(0f, y, 0f, 0f),
+                listOf(0f, 0f, z, 0f),
+                listOf(0f, 0f, 0f, 1f),
+            )
+        )
+
+        fun rotationX(angleInRadians: Float) = Matrix(
+            listOf(
+                listOf(1f, 0f, 0f, 0f),
+                listOf(0f, cos(angleInRadians), -sin(angleInRadians), 0f),
+                listOf(0f, sin(angleInRadians), cos(angleInRadians), 0f),
+                listOf(0f, 0f, 0f, 1f),
+            )
+        )
+
+        fun rotationY(angleInRadians: Float) = Matrix(
+            listOf(
+                listOf(cos(angleInRadians), 0f, sin(angleInRadians), 0f),
+                listOf(0f, 1f, 0f, 0f),
+                listOf(-sin(angleInRadians), 0f, cos(angleInRadians), 0f),
+                listOf(0f, 0f, 0f, 1f),
+            )
+        )
+
+        fun rotationZ(angleInRadians: Float) = Matrix(
+            listOf(
+                listOf(cos(angleInRadians), -sin(angleInRadians), 0f, 0f),
+                listOf(sin(angleInRadians), cos(angleInRadians), 0f, 0f),
+                listOf(0f, 0f, 1f, 0f),
+                listOf(0f, 0f, 0f, 1f),
+            )
+        )
+
+        fun shearing(x_y: Float, x_z: Float, y_x: Float, y_z: Float, z_x: Float, z_y: Float) = Matrix(
+            listOf(
+                listOf(1f, x_y, x_z, 0f),
+                listOf(y_x, 1f, y_z, 0f),
+                listOf(z_x, z_y, 1f, 0f),
+                listOf(0f, 0f, 0f, 1f),
+            )
+        )
+
         val IdentityMatrix44 = Matrix(
             listOf(
                 listOf(1f, 0f, 0f, 0f),
