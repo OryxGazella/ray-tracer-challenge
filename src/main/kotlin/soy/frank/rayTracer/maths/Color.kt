@@ -3,8 +3,9 @@ package soy.frank.rayTracer.maths
 import kotlin.math.roundToInt
 
 class Color {
-    private val tuple : Tuple
-    constructor(red: Float, green : Float, blue: Float) {
+    private val tuple: Tuple
+
+    constructor(red: Float, green: Float, blue: Float) {
         tuple = Tuple.vector(red, green, blue)
     }
 
@@ -12,9 +13,10 @@ class Color {
     operator fun minus(other: Color) = Color(tuple - other.tuple)
     operator fun times(scalar: Float) = Color(tuple.times(scalar))
     operator fun times(other: Color) = Color(
-            red * other.red,
-            green * other.green,
-            blue * other.blue)
+        red * other.red,
+        green * other.green,
+        blue * other.blue
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -36,7 +38,7 @@ class Color {
     }
 
     fun asPixMap(): String =
-            "${(clamp(red) * 255).roundToInt()} ${(clamp(green) * 255).roundToInt()} ${(clamp(blue) * 255).roundToInt()}"
+        "${(clamp(red) * 255).roundToInt()} ${(clamp(green) * 255).roundToInt()} ${(clamp(blue) * 255).roundToInt()}"
 
 
     constructor(fromTuple: Tuple) {

@@ -4,8 +4,10 @@ import groovy.transform.Field
 import io.cucumber.groovy.EN
 import io.cucumber.groovy.Hooks
 import soy.frank.rayTracer.maths.Color
-import soy.frank.rayTracer.maths.ExtensionsKt
 import soy.frank.rayTracer.maths.Tuple
+
+import static soy.frank.rayTracer.TestVariables.asColor
+import static soy.frank.rayTracer.TestVariables.asTuple
 
 this.metaClass.mixin(EN)
 this.metaClass.mixin(Hooks)
@@ -14,9 +16,6 @@ this.metaClass.mixin(Hooks)
 def testVariables = TestVariables.map
 
 def delta = 0.000001f
-
-Before() {
-}
 
 Given("{word} := vector\\({float}, {float}, {float})") { String variableName, float x, float y, float z ->
     testVariables[variableName] = Tuple.@Companion.vector(x, y, z)
@@ -31,67 +30,55 @@ Given("{word} := point\\({float}, {float}, {float})") { String variableName, flo
 }
 
 Then("{word} is a {string}") { String variableName, String expectedType ->
-    assert expectedType.toLowerCase() == testVariables[variableName].type.toString().toLowerCase()
+    assert expectedType.toLowerCase() == asTuple(variableName).type.toString().toLowerCase()
 }
 
 Then("{word} is not a {string}") { String variableName, String nonExpectedType ->
-    assert nonExpectedType.toLowerCase() != testVariables[variableName].type.toString()
+    assert nonExpectedType.toLowerCase() != asTuple(variableName).type.toString()
 }
 
 Then(/^([a-z]+\d*) = (.*)$/) { String variableName, String expectedToString ->
-    assert expectedToString == testVariables[variableName].toString()
+    assert expectedToString == asTuple(variableName).toString()
 }
 
 Then(/^(\w+\d*) \+ (\w+\d*) = (Tuple.*)$/) { String lhs, String rhs, String expectedToString ->
-    assert (testVariables[lhs] + testVariables[rhs]).toString() == expectedToString
+    assert (asTuple(lhs) + asTuple(rhs)).toString() == expectedToString
 }
 
 Then("{word} - {word} = {string}") { String lhs, String rhs, String expectedTuple ->
-    def difference = testVariables[lhs] - testVariables[rhs]
-    assert expectedTuple == difference.toString()
+    assert (asTuple(lhs) - asTuple(rhs)).toString() == expectedTuple
 }
 
-/* Groovy and Kotlin have different names for operators
-  Groovy    | Kotlin
-  negative  | unaryMinus
-  multiply  | times
-  */
 When("{word} := {word} * {float}") { String result, String base, Float scalar ->
-    testVariables[result] = ExtensionsKt.times(scalar, testVariables[base] as Tuple)
+    testVariables[result] = scalar * asTuple(base)
 }
 
-//See above
 When("{word} := {float} * {word}") { String result, float scalar, String base ->
-    testVariables[result] = testVariables[base].times(scalar)
+    testVariables[result] = asTuple(base) * scalar
 }
 
-//See above
 Then("-a = {string}") { String expectedTuple ->
-    assert expectedTuple ==
-            (testVariables.a.unaryMinus()).toString()
+    assert expectedTuple == (-asTuple('a')).toString()
 }
 
 When("{word} := {word} / {float}") { String result, String base, float scalar ->
-    testVariables[result] = testVariables[base] / scalar
+    testVariables[result] = asTuple(base) / scalar
 }
 
 Then("magnitude\\({word}) = {float}") { String tupleName, float expectedMagnitude ->
-    assert Math.abs(
-            expectedMagnitude - testVariables[tupleName].magnitude() as float) <
-            delta
+    assert Math.abs(expectedMagnitude - asTuple(tupleName).magnitude()) < delta
 }
 
 Given("{word} := {word}.normalize") { String result, String base ->
-    testVariables[result] = testVariables[base].normalize()
+    testVariables[result] = asTuple(base).normalize()
 }
 
 Then("{word} dot {word} = {float}") { String lhs, String rhs, float expectedDotProduct ->
-    assert expectedDotProduct == testVariables[lhs].dot(testVariables[rhs])
+    assert expectedDotProduct == asTuple(lhs).dot(asTuple(rhs))
 }
 
 Then("{word} cross {word} = {string}") { String lhs, String rhs, String expectedTuple ->
-    assert expectedTuple == testVariables[lhs].cross(
-            testVariables[rhs]).toString()
+    assert expectedTuple == asTuple(lhs).cross(asTuple(rhs)).toString()
 }
 
 Given(/^([a-zA-Z]+\d*) := Color\((-?\d+\.?\d*), (-?\d+\.?\d*), (-?\d+\.?\d*)\)$/) { String colorName, float redValue, float greenValue, float blueValue ->
@@ -99,7 +86,7 @@ Given(/^([a-zA-Z]+\d*) := Color\((-?\d+\.?\d*), (-?\d+\.?\d*), (-?\d+\.?\d*)\)$/
 }
 
 Then("color.{word} = {float}") { String color, float value ->
-    assert testVariables.color.invokeMethod("get${color.capitalize()}", null) == value
+    assert asColor('color').invokeMethod("get${color.capitalize()}", null) == value
 }
 
 static def compareColor(float red, float green, float blue, Color toCompare) {
@@ -113,27 +100,27 @@ static def compareColor(float red, float green, float blue, Color toCompare) {
     }
 }
 
-Then("{word} + {word} = Color\\({float}, {float}, {float})") {String lhs, String rhs, float red, float green, float blue ->
-    Color addition = testVariables[lhs] + testVariables[rhs]
+Then("{word} + {word} = Color\\({float}, {float}, {float})") { String lhs, String rhs, float red, float green, float blue ->
+    Color addition = asColor(lhs) + asColor(rhs)
     compareColor(red, green, blue, addition)
 }
 
 Then("{word} - {word} = Color\\({float}, {float}, {float})") { String lhs, String rhs, float red, float green, float blue ->
-    Color difference = testVariables[lhs] - testVariables[rhs]
+    Color difference = asColor(lhs) - asColor(rhs)
     compareColor(red, green, blue, difference)
 }
 
 Then(/^([a-z]+\d*) \* (-?\d+\.?\d*) = Color\((.*), (.*), (.*)\)$/) { String variableName, float scalar, float red, float green, float blue ->
-    def result = testVariables[variableName].times(scalar)
+    def result = asColor(variableName) * scalar
     assert new Color(red, green, blue) == result
 }
 
-Then(/^([a-z]\d*) \* ([a-z]+\d*) = Color\((.*), (.*), (.*)\)$/) {String lhs, String rhs, float red, float green, float blue ->
-    Color product = testVariables[lhs].times(testVariables[rhs])
+Then(/^([a-z]\d*) \* ([a-z]+\d*) = Color\((.*), (.*), (.*)\)$/) { String lhs, String rhs, float red, float green, float blue ->
+    Color product = asColor(lhs) * asColor(rhs)
     compareColor(red, green, blue, product)
 }
 
 Then(/^(\d+\.?\d*) \* ([a-z]+\d*) = Color\((.*), (.*), (.*)\)$/) { float scalar, String variableName, float red, float green, float blue ->
-    def result = ExtensionsKt.times(scalar, testVariables[variableName] as Color)
+    def result = scalar * asColor(variableName)
     assert new Color(red, green, blue) == result
 }

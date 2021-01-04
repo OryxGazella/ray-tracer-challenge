@@ -6,6 +6,9 @@ import io.cucumber.groovy.Hooks
 import soy.frank.rayTracer.maths.Color
 import soy.frank.rayTracer.rendering.Canvas
 
+import static soy.frank.rayTracer.TestVariables.asCanvas
+import static soy.frank.rayTracer.TestVariables.asColor
+
 this.metaClass.mixin(EN)
 this.metaClass.mixin(Hooks)
 
@@ -16,12 +19,12 @@ Given("canvas := Canvas\\({int}, {int})") { int width, int height ->
 }
 
 Then("canvas.{word} = {int}") { String property, Integer expectedValue ->
-    assert testVariables.canvas.invokeMethod("get${property.capitalize()}", null) == expectedValue
+    assert asCanvas('canvas').invokeMethod("get${property.capitalize()}", null) == expectedValue
 }
 
 Then("every pixel of canvas is Color\\({float}, {float}, {float})") { Float redValue, Float greenValue, Float blueValue ->
     def expectedColor = new Color(redValue, greenValue, blueValue)
-    testVariables.canvas.pixels.forEach { k, row ->
+    asCanvas('canvas').pixels.forEach { k, row ->
         row.each { Color entry ->
             assert entry == expectedColor
         }
@@ -29,15 +32,15 @@ Then("every pixel of canvas is Color\\({float}, {float}, {float})") { Float redV
 }
 
 When("canvas.writePixel\\({int}, {int}, {word})") { Integer x, Integer y, String colorName ->
-    testVariables.canvas.writePixel(x, y, testVariables[colorName] as Color)
+    asCanvas('canvas').writePixel(x, y, asColor(colorName) as Color)
 }
 
 Then("canvas.pixelAt\\({int}, {int}) = {word}") { Integer x, Integer y, String colorName ->
-    assert testVariables.canvas.pixelAt(x, y) == testVariables[colorName] as Color
+    assert asCanvas('canvas').pixelAt(x, y) == asColor(colorName)
 }
 
 Then("lines {int}-{int} of canvas.ppm are") { Integer from, Integer to, String docString ->
-    def lines = testVariables.canvas.ppm.
+    def lines = asCanvas('canvas').ppm.
             drop(from - 1).
             take(to - from + 1).
             join("\n")
@@ -45,7 +48,7 @@ Then("lines {int}-{int} of canvas.ppm are") { Integer from, Integer to, String d
 }
 
 When("every pixel of c is set to Color\\({float}, {float}, {float})") { float red, float green, float blue ->
-    def canvas = testVariables.canvas as Canvas
+    def canvas = asCanvas('canvas')
     def color = new Color(red, green, blue)
     (0 ..< canvas.width).each { x ->
         (0 ..< canvas.height).each { y ->
@@ -55,5 +58,5 @@ When("every pixel of c is set to Color\\({float}, {float}, {float})") { float re
 }
 
 Then(/ppm ends with a newline/) {  ->
-    assert testVariables.canvas.ppm.last() == "\n"
+    assert asCanvas('canvas').ppm.last() == "\n"
 }
