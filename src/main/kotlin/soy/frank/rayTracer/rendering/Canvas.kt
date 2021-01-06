@@ -51,9 +51,9 @@ data class Canvas(val width: Int, val height: Int) {
 
             val header = listOf("P3", "$width $height", "255")
             return listOf(
-                    header,
-                    pixelLines,
-                    listOf("\n")
+                header,
+                pixelLines,
+                listOf("\n")
             ).flatten()
         }
 }

@@ -7,7 +7,11 @@ class Matrix {
     private val matrix: FloatArray
     val numberOfRows: Int
     val numberOfColumns: Int
-    private var determinant: Float? = null
+    private val determinant: Float by lazy {
+        this.calculateDeterminant()
+    }
+
+    fun determinant(): Float = this.determinant
 
     constructor(rows: Collection<List<Float>>) {
         numberOfRows = rows.size
@@ -144,16 +148,13 @@ class Matrix {
             }.toFloatArray()
     )
 
-    fun determinant(): Float {
+    private fun calculateDeterminant(): Float {
         return if (is2x2()) matrix[0] * matrix[3] - matrix[1] * matrix[2]
         else {
-            if (this.determinant != null) return this.determinant!!
-            val determinant = (0 until numberOfColumns)
+            (0 until numberOfColumns)
                 .fold(0f) { acc, rowEntry ->
                     acc + cofactor(0, rowEntry) * get(0, rowEntry)
                 }
-            this.determinant = determinant
-            determinant
         }
     }
 
@@ -175,8 +176,8 @@ class Matrix {
         )
     }
 
-    fun isInvertible() = determinant() != 0f
-    fun minor(row: Int, column: Int) = submatrix(row, column).determinant()
+    fun isInvertible() = calculateDeterminant() != 0f
+    fun minor(row: Int, column: Int) = submatrix(row, column).calculateDeterminant()
     fun cofactor(row: Int, column: Int): Float = minor(row, column) *
             if ((row + column) % 2 == 0) 1f else -1f
 
@@ -186,7 +187,7 @@ class Matrix {
         (0 until numberOfColumns)
             .flatMap { column ->
                 (0 until numberOfRows).map { row ->
-                    1f / determinant() * cofactor(row, column)
+                    1f / calculateDeterminant() * cofactor(row, column)
                 }
 
             }.toFloatArray()
