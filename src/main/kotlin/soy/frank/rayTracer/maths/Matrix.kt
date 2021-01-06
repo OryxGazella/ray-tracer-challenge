@@ -3,27 +3,18 @@ package soy.frank.rayTracer.maths
 import kotlin.math.cos
 import kotlin.math.sin
 
-class Matrix {
-    private val matrix: FloatArray
-    val numberOfRows: Int
-    val numberOfColumns: Int
+data class Matrix constructor(val numberOfRows: Int, val numberOfColumns: Int, val matrix: FloatArray) {
     private val determinant: Float by lazy {
         this.calculateDeterminant()
     }
 
     fun determinant(): Float = this.determinant
 
-    constructor(rows: Collection<List<Float>>) {
-        numberOfRows = rows.size
-        numberOfColumns = if (rows.isEmpty()) 0 else rows.first().size
-        matrix = rows.flatten().toFloatArray()
-    }
-
-    internal constructor(numberOfRows: Int, numberOfColumns: Int, matrix: FloatArray) {
-        this.matrix = matrix
-        this.numberOfRows = numberOfRows
-        this.numberOfColumns = numberOfColumns
-    }
+    constructor(rows: Collection<List<Float>>) :
+            this(rows.size,
+                if (rows.isEmpty()) 0 else rows.first().size,
+                rows.flatten().toFloatArray(),
+            )
 
     companion object {
         fun translation(x: Float, y: Float, z: Float) = Matrix(
@@ -119,23 +110,6 @@ class Matrix {
             }
             .toFloatArray()
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Matrix
-        if (!matrix.contentEquals(other.matrix)) return false
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return matrix.hashCode()
-    }
-
-    override fun toString(): String {
-        return "Matrix(matrix=${matrix.contentToString()}, numberOfRows=$numberOfRows, numberOfColumns=$numberOfColumns)"
-    }
-
     fun transposed() = Matrix(
         numberOfColumns,
         numberOfRows,
@@ -192,4 +166,24 @@ class Matrix {
 
             }.toFloatArray()
     )
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Matrix
+
+        if (numberOfRows != other.numberOfRows) return false
+        if (numberOfColumns != other.numberOfColumns) return false
+        if (!matrix.contentEquals(other.matrix)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = numberOfRows
+        result = 31 * result + numberOfColumns
+        result = 31 * result + matrix.contentHashCode()
+        return result
+    }
 }
