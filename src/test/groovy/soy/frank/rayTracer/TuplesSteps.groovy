@@ -17,15 +17,15 @@ def testVariables = TestVariables.map
 
 def delta = 0.000001f
 
-Given("{word} := vector\\({float}, {float}, {float})") { String variableName, float x, float y, float z ->
+Given("{word} ← vector\\({float}, {float}, {float})") { String variableName, float x, float y, float z ->
     testVariables[variableName] = Tuple.@Companion.vector(x, y, z)
 }
 
-Given(/^([a-z]\d*) := Tuple\((.*), (.*), (.*), (.*)\)$/) { String variableName, float x, float y, float z, float w ->
+Given(/^([a-z]\d*) ← Tuple\((.*), (.*), (.*), (.*)\)$/) { String variableName, float x, float y, float z, float w ->
     testVariables[variableName] = new Tuple(x, y, z, w)
 }
 
-Given("{word} := point\\({float}, {float}, {float})") { String variableName, float x, float y, float z ->
+Given("{word} ← point\\({float}, {float}, {float})") { String variableName, float x, float y, float z ->
     testVariables[variableName] = Tuple.@Companion.point(x, y, z)
 }
 
@@ -49,11 +49,11 @@ Then("{word} - {word} = {string}") { String lhs, String rhs, String expectedTupl
     assert (asTuple(lhs) - asTuple(rhs)).toString() == expectedTuple
 }
 
-When("{word} := {word} * {float}") { String result, String base, Float scalar ->
+When("{word} ← {word} * {float}") { String result, String base, Float scalar ->
     testVariables[result] = scalar * asTuple(base)
 }
 
-When("{word} := {float} * {word}") { String result, float scalar, String base ->
+When("{word} ← {float} * {word}") { String result, float scalar, String base ->
     testVariables[result] = asTuple(base) * scalar
 }
 
@@ -61,7 +61,7 @@ Then("-a = {string}") { String expectedTuple ->
     assert expectedTuple == (-asTuple('a')).toString()
 }
 
-When("{word} := {word} / {float}") { String result, String base, float scalar ->
+When("{word} ← {word} / {float}") { String result, String base, float scalar ->
     testVariables[result] = asTuple(base) / scalar
 }
 
@@ -69,7 +69,7 @@ Then("magnitude\\({word}) = {float}") { String tupleName, float expectedMagnitud
     assert Math.abs(expectedMagnitude - asTuple(tupleName).magnitude()) < delta
 }
 
-Given("{word} := {word}.normalize") { String result, String base ->
+Given("{word} ← {word}.normalize") { String result, String base ->
     testVariables[result] = asTuple(base).normalize()
 }
 
@@ -81,7 +81,7 @@ Then("{word} cross {word} = {string}") { String lhs, String rhs, String expected
     assert expectedTuple == asTuple(lhs).cross(asTuple(rhs)).toString()
 }
 
-Given(/^([a-zA-Z]+\d*) := Color\((-?\d+\.?\d*), (-?\d+\.?\d*), (-?\d+\.?\d*)\)$/) { String colorName, float redValue, float greenValue, float blueValue ->
+Given(/^([a-zA-Z]+\d*) ← Color\((-?\d+\.?\d*), (-?\d+\.?\d*), (-?\d+\.?\d*)\)$/) { String colorName, float redValue, float greenValue, float blueValue ->
     testVariables[colorName] = new Color(redValue, greenValue, blueValue)
 }
 

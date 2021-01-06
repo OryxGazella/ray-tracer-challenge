@@ -14,7 +14,7 @@ this.metaClass.mixin(Hooks)
 
 @Field private Object testVariables = TestVariables.map
 
-Given("canvas := Canvas\\({int}, {int})") { int width, int height ->
+Given("canvas ← Canvas\\({int}, {int})") { int width, int height ->
     testVariables.canvas = new Canvas(width, height)
 }
 

@@ -79,7 +79,7 @@ Then(/^A.submatrix\((.*), (.*)\) is the following matrix:$/) { Integer row, Inte
     assert asMatrix('A').submatrix(row, column) == tableToMatrix(table)
 }
 
-Given(/^B := A.submatrix\((.*), (.*)\)/) { Integer row, Integer column ->
+Given(/^B ← A.submatrix\((.*), (.*)\)/) { Integer row, Integer column ->
     testVariables.B = asMatrix('A').submatrix(row, column)
 }
 
@@ -99,7 +99,7 @@ Then(/A is not invertible/) { ->
     assert !asMatrix('A').invertible
 }
 
-Given(/^(\w*) := (\w*).inverse\(\)$/) { String resultVariable, String sourceVariable ->
+Given(/^(\w*) ← (\w*).inverse\(\)$/) { String resultVariable, String sourceVariable ->
     testVariables[resultVariable] = asMatrix(sourceVariable).inverse()
 }
 
